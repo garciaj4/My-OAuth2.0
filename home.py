@@ -14,8 +14,8 @@ config['webapp2_extras.sessions'] = {
 	'secret_key': 'Im_an_alien',
 }
 
-myClientId = '208594160583-shpbueepu59cb3fjslli3bp91il9q6h0.apps.googleusercontent.com'
-myClientSecret = 'RXWI-WbIkD3x9SDrESewjj8D'
+myClientId = '208594160583-p4mjuirdaib9kecknlupfui3fdhr8807.apps.googleusercontent.com'
+myClientSecret = 'C4bPCp9oGTPU6lrIfuZbk3gc'
 myClientURL = 'http://localhost:8080'
 
 #http://webapp2.readthedocs.io/en/latest/api/webapp2_extras/sessions.html
@@ -92,3 +92,10 @@ app = webapp2.WSGIApplication([
 
 ], config=config, debug=True)
 # [END app]
+
+https://accounts.google.com/o/oauth2/v2/auth
+?response_type=code
+&client_id=208594160583-shpbueepu59cb3fjslli3bp91il9q6h0.apps.googleusercontent.com
+&redirect_uri=https://myoauth-211216.appspot.com/OAuth
+&scope=email
+&state=4ejpqTs-QxmUrC8uFQDk9A
