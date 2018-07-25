@@ -11,12 +11,12 @@ import urllib
 #https://gist.github.com/jgeewax/2942374
 config = {}
 config['webapp2_extras.sessions'] = {
-	'secret_key': 'Im_an_alien',
+	'secret_key': 'superSecret',
 }
 
-myClientId = '208594160583-p4mjuirdaib9kecknlupfui3fdhr8807.apps.googleusercontent.com'
-myClientSecret = 'C4bPCp9oGTPU6lrIfuZbk3gc'
-myClientURL = 'http://localhost:8080'
+myClientId = '208594160583-i4mk1mt5ncvm41u7hai6t475eskcm8mi.apps.googleusercontent.com'
+myClientSecret = '4tJLjBuT5JCeNkUJ1Gj8cN3u'
+myClientURL = 'https://myoauth-211216.appspot.com'
 
 #http://webapp2.readthedocs.io/en/latest/api/webapp2_extras/sessions.html
 class BaseHandler(webapp2.RequestHandler):
@@ -48,10 +48,28 @@ class MainPage(BaseHandler):
 
 class googleRedirect(BaseHandler):
 	def get(self):
-		token = ''
-		if(token):
-			self.response.write('Display Info')
+		#if we already have a token stored
+		if(self.session.get('token')):
 
+			#build an http get request to get the users data
+			googleDataURL = 'https://www.googleapis.com/plus/v1/people/me'
+			token = 'Bearer ' + self.session.get('token')
+			headers = {'authorization': token}
+			result = urlfetch.fetch(url=googleDataURL, headers=headers)
+
+			result_data = json.loads(result.content)
+
+			display_values = {
+				'fname': result_data['name']['givenName'],
+				'lname': result_data['name']['familyName'],
+				'URL': result_data['url'],
+				'state': self.session.get('state')
+			}
+
+			path = os.path.join(os.path.dirname(__file__), 'display.html')
+			self.response.out.write(template.render(path, display_values))
+			#self.response.write(result_data)
+		
 		elif(self.request.get('state')):
 			if(self.session.get('state') == self.request.get('state')):
 				googleURL = 'https://www.googleapis.com/oauth2/v4/token'
@@ -59,13 +77,17 @@ class googleRedirect(BaseHandler):
 					'code':self.request.get('code'),
 					'client_id': myClientId,
 					'client_secret': myClientSecret,
-					'redirect_uri': myClientURL,
+					'redirect_uri': myClientURL + '/OAuth',
 					'grant_type': 'authorization_code'
 				})
 
 				result = urlfetch.fetch(googleURL, method=urlfetch.POST, payload=payload)
+				result_data = json.loads(result.content)
 
-				self.response.write(result.content)
+				self.session['token'] = result_data['access_token']
+
+				self.redirect(myClientURL + '/OAuth')
+				#self.response.write(result_data)
 			else:
 				self.response.write('Invalid State Returned')
 
@@ -88,14 +110,8 @@ class googleRedirect(BaseHandler):
 app = webapp2.WSGIApplication([
 
     ('/', MainPage),
+    ('/googleRedirect', googleRedirect),
     ('/OAuth', googleRedirect)
 
 ], config=config, debug=True)
 # [END app]
-
-https://accounts.google.com/o/oauth2/v2/auth
-?response_type=code
-&client_id=208594160583-shpbueepu59cb3fjslli3bp91il9q6h0.apps.googleusercontent.com
-&redirect_uri=https://myoauth-211216.appspot.com/OAuth
-&scope=email
-&state=4ejpqTs-QxmUrC8uFQDk9A
